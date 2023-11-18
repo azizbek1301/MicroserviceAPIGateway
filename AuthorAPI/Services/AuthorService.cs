@@ -54,19 +54,55 @@ namespace AuthorAPI.Services
             }
         }
 
-        public ValueTask<List<Author>> GetAllAsync()
+        public async ValueTask<List<Author>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _dbContext.Authors.AsNoTracking().ToListAsync();
+                return res;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
         }
 
-        public ValueTask<Author> GetByIdAsync(int id)
+        public async ValueTask<Author> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _dbContext.Authors.FirstOrDefaultAsync(x=>x.Id==id);
+                return res;
+
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
         }
 
-        public ValueTask<string> UpdateAuthorAsync(int id, AuthorDto authorDto)
+        public async ValueTask<string> UpdateAuthorAsync(int id, AuthorDto authorDto)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _dbContext.Authors.FirstOrDefaultAsync(x => x.Id == id);
+                if (res != null)
+                {
+                    res.Name = authorDto.Name;
+                    res.Surname = authorDto.Surname;
+                    res.Email = authorDto.Email;
+                    await _dbContext.SaveChangesAsync();
+                    return "YAngilndi";
+                }
+                else
+                {
+                    return "Topilmadi";
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }
