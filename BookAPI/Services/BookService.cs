@@ -1,33 +1,106 @@
-﻿using BookAPI.DTOs;
+﻿using BookAPI.DataAcsess;
+using BookAPI.DTOs;
 using BookAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookAPI.Services
 {
     public class BookService : IBookService
     {
-        public ValueTask<bool> CreateBookAsync(BookDto book)
+        private readonly AppDbContext _context;
+        public BookService(AppDbContext appDbContext)
         {
-            throw new NotImplementedException();
+            _context = appDbContext;
+        }
+        public async ValueTask<bool> CreateBookAsync(BookDto book)
+        {
+            try
+            {
+                var res = new Book()
+                {
+                    Name = book.Name,
+                    Price = book.Price,
+                };
+                await _context.Books.AddAsync(res);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public ValueTask<string> DeleteByIdAsync(int id)
+        public async ValueTask<string> DeleteByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+                if(res !=null)
+                {
+                    _context.Books.Remove(res);
+                    await _context.SaveChangesAsync();
+                    return "Delete";
+                }
+                else
+                {
+                    return "Not found Book";
+                }
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
         }
 
-        public ValueTask<List<Book>> GetAllBooksAsync()
+        public async ValueTask<List<Book>> GetAllBooksAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _context.Books.AsNoTracking().ToListAsync();
+                return res;
+
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
         }
 
-        public ValueTask<Book> GetByIdAsync(int id)
+        public async ValueTask<Book> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+                return res;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
-        public ValueTask<string> UpdateBookAsync(int id, BookDto book)
+        public async ValueTask<string> UpdateBookAsync(int id, BookDto book)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var res = await _context.Books.FirstOrDefaultAsync(x => x.Id == id);
+                if (res != null)
+                {
+                    res.Name = book.Name;
+                    res.Price = book.Price;
+                    await _context.SaveChangesAsync();
+                    return "Yangilandi";
+                }
+                else
+                {
+                    return "Topilmadi";
+                }
+            }
+            catch(Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }
